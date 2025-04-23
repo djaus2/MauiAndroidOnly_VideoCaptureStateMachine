@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiAppAndroidOnly.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout x:Name="MyLayout"     
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="dotnet_athletics.png"
+                HeightRequest="185"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a hovercraft number nine" />
+
+            <Label
+                Text="MAUI Video Recording State Machine (only) App"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Label
+                x:Name="GreetingLabel"
+                Text=""
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
+
+                <Entry x:Name="Filename" Placeholder="Enter Video FileName (without .mp4)" Completed="OnFilenameCompleted" />
+            <Button Text="Setup Recording" Clicked="OnButton_GetReady4RecordingAsync" IsEnabled="{Binding IsGetReadyButtonEnabled}" />
+            <Button Text="Start" Clicked="OnButton_StartRecording_ClickedAsync" IsEnabled="{Binding IsStartRecordingButtonEnabled}" />
+            <Button Text="Pause" Clicked="OnButton_PauseRecording_ClickedAsync" IsEnabled="{Binding IsPauseRecordingButtonEnabled}" />
+
+            <Button Text="Continue" Clicked="OnButton_ContinueRecording_ClickedAsync" IsEnabled="{Binding IsContinueRecordingButtonEnabled}" />
+            <Button Text="Stop" Clicked="OnButton_StopRecordingClickedAsync"  IsEnabled="{Binding IsStopRecordingButtonEnabled}"/>
+            </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
