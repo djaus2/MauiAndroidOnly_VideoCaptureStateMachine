@@ -9,38 +9,44 @@ using System.ComponentModel;
 
 public partial class MainPage : ContentPage
 {
-    private readonly IAndroidVideoRecorderService _androidVideoRecorderService;
+    private readonly IAndroidVideoRecorderService? _androidVideoRecorderService;
 
-    public MainPage(IAndroidVideoRecorderService androidVideoRecorderService)
+
+    public RecordingViewModel ViewModel { get; }
+
+    public MainPage(IAndroidVideoRecorderService? androidVideoRecorderService)
     {
         InitializeComponent();
         PerformPerms();
-        BindingContext = new RecordingViewModel();
+        ViewModel = new RecordingViewModel();
+        BindingContext = ViewModel;
+        ViewModel.State = MediaRecorderState.Stopped; // Button gets disabled
         Appearing += MainPage_Appearing;
         Disappearing += MainPage_Disappearing;
         _androidVideoRecorderService = androidVideoRecorderService;
-        var viewModel = (RecordingViewModel)BindingContext;
-        viewModel.State = MediaRecorderState.Stopped; // Button gets disabled
     }
 
 
-    protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public new event PropertyChangedEventHandler PropertyChanged;
+    public new event PropertyChangedEventHandler? PropertyChanged;
 
+    /*
     //////////////////////////////////////////////////////////////////////////////////////
+    /// ACTIVITY INDICATOR
     /// In XAML:
-    /// <VerticalStackLayout x:Name="MyLayout"
+    ///  <VerticalStackLayout x:Name="MyLayout" ...
     //////////////////////////////////////////////////////////////////////////////////////
     /// ActivityIndicator is created and shown on Button press to start Stitching
     /// Is disposed when the stitching process is completed
     //////////////////////////////////////////////////////////////////////////////////////
-
-    // The activity indicator
-    private ActivityIndicator activityIndicator;
+    ///
+    */
+    /// The activity indicator
+    private ActivityIndicator? activityIndicator;
 
     /// <summary>
     /// Called by Buttun Click event handler on MainThread
@@ -54,6 +60,7 @@ public partial class MainPage : ContentPage
             Color = Colors.Blue // Optional: Set a color for visibility
         };
         // Assuming you have a named layout in XAML
+        // Insert between 2nd and 3rd items in the layout
         MyLayout.Children.Insert(2,activityIndicator);
     }
 
@@ -102,7 +109,7 @@ public partial class MainPage : ContentPage
                     $"{filename}_{timestamp}.mp4"
                 );
 
-                GreetingLabel.Text = _androidVideoRecorderService.GetReady4Recording(videoFileName);
+                GreetingLabel.Text = _androidVideoRecorderService?.GetReady4Recording(videoFileName);
                 await Task.Delay(500);
                 var viewModel = (RecordingViewModel)BindingContext;
                 viewModel.State = MediaRecorderState.Prepared;
@@ -119,7 +126,7 @@ public partial class MainPage : ContentPage
     {
         var viewModel = (RecordingViewModel)BindingContext;
         viewModel.State = MediaRecorderState.Processing;
-        GreetingLabel.Text = _androidVideoRecorderService.StartRecording();
+        GreetingLabel.Text = _androidVideoRecorderService?.StartRecording();
         await Task.Delay(500);
         viewModel.State = MediaRecorderState.Recording; // Button gets disabled
         StartActivity();
@@ -130,7 +137,7 @@ public partial class MainPage : ContentPage
     {
         var viewModel = (RecordingViewModel)BindingContext;
         viewModel.State = MediaRecorderState.Processing;
-        GreetingLabel.Text = _androidVideoRecorderService.PauseRecording();;
+        GreetingLabel.Text = _androidVideoRecorderService?.PauseRecording();;
         await Task.Delay(500);
         viewModel.State = MediaRecorderState.Paused; // Button gets disabled
         StopActivity();
@@ -140,7 +147,7 @@ public partial class MainPage : ContentPage
     {
         var viewModel = (RecordingViewModel)BindingContext;
         viewModel.State = MediaRecorderState.Processing;
-        GreetingLabel.Text = _androidVideoRecorderService.ContinueRecording();
+        GreetingLabel.Text = _androidVideoRecorderService?.ContinueRecording();
         await Task.Delay(500);
         viewModel.State = MediaRecorderState.Recording; // Button gets disabled
         StartActivity();
@@ -150,7 +157,7 @@ public partial class MainPage : ContentPage
     {
         var viewModel = (RecordingViewModel)BindingContext;
         viewModel.State = MediaRecorderState.Processing;
-        GreetingLabel.Text = _androidVideoRecorderService.StopRecording();
+        GreetingLabel.Text = _androidVideoRecorderService?.StopRecording();
         await Task.Delay(500);
         viewModel.State = MediaRecorderState.Stopped; // Button gets disabled
         StopActivity();
@@ -159,17 +166,19 @@ public partial class MainPage : ContentPage
 
     #region Page Lifecycle
 
-    private async void MainPage_Appearing(object sender, EventArgs e)
+    private async void MainPage_Appearing(object? sender, EventArgs e)
     {
+        await Task.Delay(10); // Delay to allow UI to load
         // Setup camera when page appears
         // Task.Run(async () => await _cameraService.SetupCameraAsync());
         //_videoRecorderService..Wait();
     }
 
-    private async void MainPage_Disappearing(object sender, EventArgs e)
+    private async void MainPage_Disappearing(object? sender, EventArgs e)
     {
         // Cleanup resources when page disappears
-        await _androidVideoRecorderService.CleanupResourcesAsync();
+        if(_androidVideoRecorderService != null)
+            await _androidVideoRecorderService.CleanupResourcesAsync();
         //_videoRecorderService.CleanupResourcesAsync.Wait();
     }
 
